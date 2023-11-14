@@ -128,13 +128,20 @@ def load_data(tokenizer, params):
     #     pickle.dump(train_dataset['train']['test'], output)
     # with open('test_dataset.pickle', 'wb') as output:
     #     pickle.dump(train_dataset['test'], output)
+    # train_dataset['train']['train'].to_json("train_dataset.json")
+    # train_dataset['train']['test'].to_json("val_dataset.json")
+    # train_dataset['test'].to_json("test_dataset.json")
 
-    with open('train_dataset.pickle', 'rb') as output:
-        train_dataset = pickle.load(output)
-    with open('val_dataset.pickle', 'rb') as output:
-        val_dataset = pickle.load(output)
-    with open('test_dataset.pickle', 'rb') as output:
-        test_dataset = pickle.load(output)
+    train_dataset = load_dataset("json", data_files="train_dataset.json")
+    val_dataset = load_dataset("json", data_files="val_dataset.json")
+    test_dataset = load_dataset("json", data_files="test_dataset.json")
+
+    # with open('train_dataset.pickle', 'rb') as output:
+    #     train_dataset = pickle.load(output)
+    # with open('val_dataset.pickle', 'rb') as output:
+    #     val_dataset = pickle.load(output)
+    # with open('test_dataset.pickle', 'rb') as output:
+    #     test_dataset = pickle.load(output)
 
     print(train_dataset)
 
