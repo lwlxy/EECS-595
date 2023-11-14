@@ -114,17 +114,20 @@ def load_data(tokenizer, params):
             return batch
 
     # split dataset
+    # train_dataset = load_dataset('truthful_qa', 'generation', split='validation')
+    # train_dataset = train_dataset.train_test_split(test_size=0.2)
+    # train_dataset['train'] = train_dataset['train'].train_test_split(test_size=0.25)
     # train_dataset = load_dataset('truthful_qa', 'generation', split='validation[0%:60%](pct1_dropremainder)')
     # val_dataset = load_dataset('truthful_qa', 'generation', split='validation[60%:80%](pct1_dropremainder)')
     # test_dataset = load_dataset('truthful_qa', 'generation', split='validation[80%:100%](pct1_dropremainder)')
     # import pickle
     # print(train_dataset)
     # with open('train_dataset.pickle', 'wb') as output:
-    #     pickle.dump(train_dataset, output)
+    #     pickle.dump(train_dataset['train']['train'], output)
     # with open('val_dataset.pickle', 'wb') as output:
-    #     pickle.dump(val_dataset, output)
+    #     pickle.dump(train_dataset['train']['test'], output)
     # with open('test_dataset.pickle', 'wb') as output:
-    #     pickle.dump(test_dataset, output)
+    #     pickle.dump(train_dataset['test'], output)
 
     with open('train_dataset.pickle', 'rb') as output:
         train_dataset = pickle.load(output)
@@ -135,7 +138,7 @@ def load_data(tokenizer, params):
 
     print(train_dataset)
 
-    print(train_dataset)
+    print(val_dataset)
     # tokenized_train_dataset = train_dataset.map(tokenize_function, batched=True)
     tokenized_train_dataset = Dataset.from_dict(tokenize_function(train_dataset))
     print(tokenized_train_dataset)
