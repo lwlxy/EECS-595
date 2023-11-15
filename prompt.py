@@ -5,7 +5,11 @@ import pandas as pd
 import openai
 import pickle, json
 import copy
+import sys
 
+# import bleurt
+sys.path.insert(0, 'bleurt')
+from evaluator import Evaluator
 
 OPENAI_API_KEY = "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"
 # MODEL = "gpt-4"
@@ -14,10 +18,6 @@ MODEL = "gpt-3.5-turbo"
 
 SYSTEM_PROMPT_PROCESSING_ROLE = ""
 
-
-# test_dataset  = pd.read_pickle(r'/home/rueiche/eecs595/EECS-595/test_dataset.pickle')
-# train_dataset = pd.read_pickle(r'/home/rueiche/eecs595/EECS-595/train_dataset.pickle')
-# val_dataset   = pd.read_pickle(r'/home/rueiche/eecs595/EECS-595/val_dataset.pickle')
 
 class GPT:
     def __init__(self, model="gpt-3.5-turbo"):
@@ -92,7 +92,7 @@ class GPT:
             if len(distractors) >0:
                 print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
                 print(output)
-                self.existing_questions.append({"category": category, "question":test_instance['question'], "distractors":distractors, "best_answer": test_instance['best_answer'], "correct_answers":test_instance['correct_answers'], "incorrect_answers": test_instance['correct_answers']})
+                self.existing_questions.append({"category": category, "question":test_instance['question'], "distractors":distractors, "best_answer": test_instance['best_answer'], "correct_answers":test_instance['correct_answers'], "incorrect_answers": test_instance['incorrect_answers']})
 
             json_string = json.dumps(self.existing_questions, indent=4)
             with open("prompt_output_dataset.json", "w") as outfile:
@@ -156,9 +156,36 @@ class GPT:
                 
                 
     def evaluate(self):
-        pass
+        evaluator = Evaluator()
+        
+        for index, instance in enumerate(self.existing_questions):
+            distractors = instance['distractors']
+            incorrect_answers = instance['incorrect_answers']
+            scores = []
+            score_correspondences = []
+            print("distractors", len(distractors))
+            for distractor in distractors:
+                references = incorrect_answers
+                candidates = [distractor for i in range(len(incorrect_answers))]
+                output_scores = evaluator.evaluate(references, candidates)
+                max_score = max(output_scores)
+                score_index = output_scores.index(max_score)
+                scores.append(max_score)
+                score_correspondence = references[score_index]
+                score_correspondences.append(score_correspondence)
+                # print(scores, max(scores))
+
+            self.existing_questions[index]['scores'] = scores
+            self.existing_questions[index]['score_correspondences'] = score_correspondences
+            print(scores, score_correspondences)
+            
+            json_string = json.dumps(self.existing_questions, indent=4)
+            with open("prompt_output_dataset.json", "w") as outfile:
+                outfile.write(json_string)
+        return
 
 if __name__ == "__main__":
     gpt = GPT('gpt-4')
-    gpt.refine_prompt_output()
+    gpt.evaluate()
+    # gpt.refine_prompt_output()
     # gpt.generate_distractor()
