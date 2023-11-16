@@ -30,6 +30,7 @@ def load_data(tokenizer, params):
         questions = []
         options = []
         labels = []
+        print(examples)
         for i in range(0, len(examples["best_answer"])):
             question = examples["question"][i] + examples["best_answer"][i]
             # label the correct_answers as bad distractors
@@ -85,15 +86,18 @@ def load_data(tokenizer, params):
 
         def __call__(self, features):
 
-            labels = [feature.pop('options') for feature in features]
+            # labels = [feature.pop('options') for feature in features]
             batch_size = len(features)
-            print(labels)
+            # print(labels)
             # num_choices = 1
             # print(num_choices)
 
             # Flatten
-            flattened_features = [[{k: v for k, v in feature.items()}] for feature in features]
+            # flattened_features = [[{k: v for k, v in feature.items()}] for feature in features]
+            flattened_features = [[{'input_ids': feature['input_ids']}] for feature in features]
+            label_features = [[{'input_ids': feature['options']}] for feature in features]
             flattened_features = sum(flattened_features, [])
+            label_features = sum(label_features, [])
             print(flattened_features)
 
             # Apply Padding
@@ -105,11 +109,23 @@ def load_data(tokenizer, params):
                 return_tensors="pt",
             )
 
+            labels_batch = self.tokenizer.pad(
+                label_features,
+                padding=self.padding,
+                max_length=self.max_length,
+                pad_to_multiple_of=self.pad_to_multiple_of,
+                return_tensors="pt",
+            )
+
             # Un-flatten
             batch = {k: v.view(batch_size, -1).to(device) for k, v in batch.items()}
-
+            labels_batch = {k: v.view(batch_size, -1).to(device) for k, v in labels_batch.items()}
+            batch["labels"] = labels_batch
+            print(batch)
+            print(labels_batch)
+            # print(torch.tensor(labels))
             # Add back labels
-            batch["options"] = torch.tensor(labels, device=device)
+            # batch["options"] = torch.tensor(labels, device=device)
 
             return batch
 
@@ -147,14 +163,14 @@ def load_data(tokenizer, params):
 
     print(val_dataset)
     # tokenized_train_dataset = train_dataset.map(tokenize_function, batched=True)
-    tokenized_train_dataset = Dataset.from_dict(tokenize_function(train_dataset))
+    tokenized_train_dataset = Dataset.from_dict(tokenize_function(train_dataset['train']))
     print(tokenized_train_dataset)
     # tokenized_train_dataset = tokenized_train_dataset.remove_columns(["type", "category", "source"])
     # tokenized_dataset = tokenized_dataset.rename_column("answerKey", "labels")
     tokenized_train_dataset.set_format("torch")
-    tokenized_val_dataset = Dataset.from_dict(tokenize_function(val_dataset))
+    tokenized_val_dataset = Dataset.from_dict(tokenize_function(val_dataset['train']))
     tokenized_val_dataset.set_format("torch")
-    tokenized_test_dataset = Dataset.from_dict(tokenize_function(test_dataset))
+    tokenized_test_dataset = Dataset.from_dict(tokenize_function(test_dataset['train']))
     tokenized_test_dataset.set_format("torch")
 
     batch_size = params.batch_size
