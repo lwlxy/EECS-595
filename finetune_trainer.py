@@ -5,6 +5,11 @@ import numpy as np
 from transformers import AutoTokenizer, DataCollatorForSeq2Seq
 from transformers import AutoModelForSeq2SeqLM, Seq2SeqTrainingArguments, Seq2SeqTrainer, AutoModelForCausalLM
 
+# create results folder if doesn't exist
+import os
+if not os.path.exists("./results"):
+    os.makedirs("./results")
+
 # Prepare and tokenize dataset
 train_dataset = load_dataset("json", data_files="train_dataset_processed.json")
 val_dataset = load_dataset("json", data_files="val_dataset_processed.json")
@@ -86,4 +91,14 @@ trainer = Seq2SeqTrainer(
 )
 
 trainer.train()
-print(trainer.evaluate(tokenized_test))
+
+print("Saving model...")
+trainer.save_model("./results")
+
+# Evaluate on test set and print results
+predictions = trainer.predict(tokenized_test)
+print(predictions.metrics)
+
+# Evaluate on test set and print results - different method
+eval_results = trainer.evaluate(tokenized_test)
+print(eval_results)
