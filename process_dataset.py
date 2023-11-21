@@ -10,7 +10,7 @@ options = []
 
 examples = train_dataset
 for i in range(0, len(examples["best_answer"])):
-    question = examples["question"][i] + examples["best_answer"][i]
+    question = examples["question"][i] + " [SEP] " + examples["best_answer"][i]
     for s in examples["incorrect_answers"][i]:
         questions.append(question)
         options.append(s)
@@ -23,7 +23,7 @@ options = []
 
 examples = val_dataset
 for i in range(0, len(examples["best_answer"])):
-    question = examples["question"][i] + examples["best_answer"][i]
+    question = examples["question"][i] + " [SEP] " + examples["best_answer"][i]
     for s in examples["incorrect_answers"][i]:
         questions.append(question)
         options.append(s)
@@ -36,7 +36,7 @@ options = []
 
 examples = test_dataset
 for i in range(0, len(examples["best_answer"])):
-    question = examples["question"][i] + examples["best_answer"][i]
+    question = examples["question"][i] + " [SEP] " + examples["best_answer"][i]
     for s in examples["incorrect_answers"][i]:
         questions.append(question)
         options.append(s)

@@ -100,7 +100,7 @@ print("Saving model...")
 trainer.save_model("./results")
 
 # Evaluate on test set and print results
-predictions = trainer.predict(tokenized_test)
+predictions = model.generate(tokenized_test)
 print(predictions.predictions)
 print(predictions.label_ids)
 print(predictions.metrics)

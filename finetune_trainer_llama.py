@@ -25,7 +25,7 @@ def preprocess_function(examples):
     output_texts = []
 
     for i in range(len(examples['question'])):
-        text = f"### Input: ```{examples['question'][i]}```\n ### Output: {examples['options'][i]}"
+        text = f"Input: ```{examples['question'][i]}```\n Output: {examples['options'][i]}"
         output_texts.append(text)
 
     return output_texts
