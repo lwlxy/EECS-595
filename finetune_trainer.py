@@ -14,15 +14,13 @@ if not os.path.exists("./results"):
 train_dataset = load_dataset("json", data_files="train_dataset_processed.json")
 val_dataset = load_dataset("json", data_files="val_dataset_processed.json")
 test_dataset = load_dataset("json", data_files="test_dataset_processed.json")
-tokenizer = AutoTokenizer.from_pretrained("t5-small")
+tokenizer = AutoTokenizer.from_pretrained("t5-large")
 prefix = "Create other options for this question-answer pair: "
 
 def preprocess_function(examples):
     inputs = [prefix + doc for doc in examples["question"]]
     model_inputs = tokenizer(inputs, max_length=1024, truncation=True)
-
     labels = tokenizer(text_target=examples["options"], max_length=128, truncation=True)
-
     model_inputs["labels"] = labels["input_ids"]
     return model_inputs
 
@@ -49,6 +47,12 @@ def compute_metrics(eval_preds):
     decoded_preds = ["\n".join(nltk.sent_tokenize(pred.strip())) for pred in decoded_preds]
     decoded_labels = ["\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_labels]
 
+    # write to file
+    with open("./results/decoded_preds.txt", "w") as f:
+        f.write("\n".join(decoded_preds))
+    with open("./results/decoded_labels.txt", "w") as f:
+        f.write("\n".join(decoded_labels))
+
     result = metric.compute(predictions=decoded_preds, references=decoded_labels)
     return result
 
@@ -68,12 +72,12 @@ for i in range(0,4):
 training_args = Seq2SeqTrainingArguments(
     output_dir="./results",
     evaluation_strategy="epoch",
-    learning_rate=2e-5,
+    learning_rate=2e-4,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=4,
     weight_decay=0.01,
     save_total_limit=3,
-    num_train_epochs=5,
+    num_train_epochs=10,
     logging_steps=100,
     eval_steps=100,
     # fp16=True,
@@ -97,8 +101,21 @@ trainer.save_model("./results")
 
 # Evaluate on test set and print results
 predictions = trainer.predict(tokenized_test)
+print(predictions.predictions)
+print(predictions.label_ids)
 print(predictions.metrics)
 
-# Evaluate on test set and print results - different method
-eval_results = trainer.evaluate(tokenized_test)
-print(eval_results)
+# decode preds and labels
+labels = np.where(predictions.label_ids != -100, predictions.label_ids, tokenizer.pad_token_id)
+decoded_preds = tokenizer.batch_decode(predictions.predictions, skip_special_tokens=True)
+decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
+
+# rougeLSum expects newline after each sentence
+decoded_preds = ["\n".join(nltk.sent_tokenize(pred.strip())) for pred in decoded_preds]
+decoded_labels = ["\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_labels]
+
+# write to file
+with open("./results/decoded_preds_2.txt", "w") as f:
+    f.write("\n".join(decoded_preds))
+with open("./results/decoded_labels_2.txt", "w") as f:
+    f.write("\n".join(decoded_labels))

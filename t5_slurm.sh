@@ -18,4 +18,4 @@ pip install transformers[torch]
 pip install -r requirements.txt
 
 # run job
-python finetune_trainer.py > project_output.txt
+python finetune_trainer.py
