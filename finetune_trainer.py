@@ -28,6 +28,8 @@ print(train_dataset['train'])
 tokenized_train = train_dataset['train'].map(preprocess_function, batched=True)
 tokenized_val = val_dataset['train'].map(preprocess_function, batched=True)
 tokenized_test = test_dataset['train'].map(preprocess_function, batched=True)
+print(tokenized_test['input_ids'])
+ps
 
 # Setup evaluation
 nltk.download("punkt", quiet=True)
@@ -99,23 +101,27 @@ trainer.train()
 print("Saving model...")
 trainer.save_model("./results")
 
-# Evaluate on test set and print results
-predictions = model.generate(tokenized_test)
-print(predictions.predictions)
-print(predictions.label_ids)
-print(predictions.metrics)
+# # Evaluate on test set and print results
+decoded_preds = []
+for input in tokenized_test["input_ids"]:
+    prediction = model.generate(torch.tensor([input]), do_sample=True)
+# predictions = model.generate(tokenized_test)
+# print(predictions.predictions)
+# print(predictions.label_ids)
+# print(predictions.metrics)
 
 # decode preds and labels
-labels = np.where(predictions.label_ids != -100, predictions.label_ids, tokenizer.pad_token_id)
-decoded_preds = tokenizer.batch_decode(predictions.predictions, skip_special_tokens=True)
-decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
+# labels = np.where(predictions.label_ids != -100, predictions.label_ids, tokenizer.pad_token_id)
+    decoded_pred = tokenizer.batch_decode(prediction, skip_special_tokens=True)
+# decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
 
 # rougeLSum expects newline after each sentence
-decoded_preds = ["\n".join(nltk.sent_tokenize(pred.strip())) for pred in decoded_preds]
-decoded_labels = ["\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_labels]
+    print(decoded_pred)
+    decoded_preds.append("\n".join(decoded_pred))
+# decoded_labels = ["\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_labels]
 
 # write to file
 with open("./results/decoded_preds_2.txt", "w") as f:
     f.write("\n".join(decoded_preds))
-with open("./results/decoded_labels_2.txt", "w") as f:
-    f.write("\n".join(decoded_labels))
+# with open("./results/decoded_labels_2.txt", "w") as f:
+#    f.write("\n".join(decoded_labels))
