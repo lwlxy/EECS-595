@@ -165,16 +165,19 @@ with torch.no_grad():
     # print(tokenizer.batch_decode(outputs.detach().numpy(), skip_special_tokens=True))
 
     decoded_preds = []
-    for i in range(len(tokenized_test["input_ids"])):
-        prediction = model.generate(torch.tensor([tokenized_test["input_ids"][i]]), attention_mask=tokenized_test["input_ids"][i]["attention_mask"], do_sample=True)
+    for i in range(len(test_dataset["input_ids"])):
+        pred = torch.tensor([test_dataset["input_ids"][i]], device=device)
+        print(pred)
+        print(torch.tensor([test_dataset["attention_mask"][i]]))
+        prediction = model.generate(input_ids=pred, attention_mask=torch.tensor([test_dataset["attention_mask"][i]], device=device))
         decoded_pred = tokenizer.batch_decode(prediction, skip_special_tokens=True)
-# decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
+        # decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
 
-# rougeLSum expects newline after each sentence
-    print(decoded_pred)
-    decoded_preds.append("\n".join(decoded_pred))
-# decoded_labels = ["\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_labels]
+        # rougeLSum expects newline after each sentence
+        print(decoded_pred)
+        decoded_preds.append("\n".join(decoded_pred))
+        # decoded_labels = ["\n".join(nltk.sent_tokenize(label.strip())) for label in d$
 
-# write to file
+        # write to file
     with open("./results/decoded_preds_peft.txt", "w") as f:
         f.write("\n".join(decoded_preds))
