@@ -29,7 +29,6 @@ tokenized_train = train_dataset['train'].map(preprocess_function, batched=True)
 tokenized_val = val_dataset['train'].map(preprocess_function, batched=True)
 tokenized_test = test_dataset['train'].map(preprocess_function, batched=True)
 print(tokenized_test['input_ids'])
-ps
 
 # Setup evaluation
 nltk.download("punkt", quiet=True)
