@@ -51,12 +51,22 @@ for file in files:
         # convert file to json format
         curr_metrics = eval(f.read())
         # normalize test_scores from 0-1
-        if('eval_scores' in curr_metrics): scores = curr_metrics['eval_scores']
-        else: scores = curr_metrics['test_scores']
+        if('eval_scores' in curr_metrics): 
+            scores = curr_metrics['eval_scores']
+            loss = curr_metrics['eval_loss']
+        else: 
+            scores = curr_metrics['test_scores']
+            loss = curr_metrics['test_loss']
         scores = np.array(scores)
-        scores = (scores - np.min(scores)) / (np.max(scores) - np.min(scores))
-        # get average of normalized scores
-        metrics_scores[key] = np.mean(scores)
+        normalized_scores = (scores - np.min(scores)) / (np.max(scores) - np.min(scores))
+        # get average of normalized scores and loss as dict
+        metrics_scores[key] = {'average_scores': np.mean(scores), 'normalized_scores': np.mean(normalized_scores), 'loss': loss}
+
+# now write metrics_scores to an easy to read file
+# one line per key, with the average score, normalized score and loss
+with open('hyperparameter_analysis.txt', 'w') as f:
+    for key, value in metrics_scores.items():
+        f.write('%s:%s\n' % (key, value))
 
 print(metrics_scores)
 
