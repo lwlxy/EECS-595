@@ -36,10 +36,10 @@ options = []
 
 examples = test_dataset
 for i in range(0, len(examples["best_answer"])):
-    question = examples["question"][i] + " [SEP] " + examples["best_answer"][i]
+    question = examples["question"][i] + " [SEP] " + examples["best_answer"][i] + '.'
     for s in examples["incorrect_answers"][i]:
         questions.append(question)
-        options.append(s)
+        options.append(s + '.')
 ds = Dataset.from_dict({"question": questions, "options": options})
 ds.to_json("test_dataset_processed.json")
 print(ds)

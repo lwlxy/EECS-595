@@ -25,7 +25,7 @@ text_column = "Tweet text"
 label_column = "text_label"
 max_length = 128
 lr = 3e-2
-num_epochs = 50
+num_epochs = 5
 batch_size = 8
 
 # create results folder if doesn't exist
