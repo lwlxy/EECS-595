@@ -4,6 +4,7 @@ import evaluate
 import numpy as np
 from transformers import AutoTokenizer, DataCollatorForSeq2Seq
 from transformers import AutoModelForSeq2SeqLM, Seq2SeqTrainingArguments, Seq2SeqTrainer, AutoModelForCausalLM
+import torch
 
 # create results folder if doesn't exist
 import os
@@ -104,23 +105,16 @@ trainer.save_model("./results")
 decoded_preds = []
 for input in tokenized_test["input_ids"]:
     prediction = model.generate(torch.tensor([input]), do_sample=True)
-# predictions = model.generate(tokenized_test)
-# print(predictions.predictions)
-# print(predictions.label_ids)
-# print(predictions.metrics)
+    # predictions = model.generate(tokenized_test)
+    # print(predictions.predictions)
+    # print(predictions.label_ids)
+    # print(predictions.metrics)
 
-# decode preds and labels
-# labels = np.where(predictions.label_ids != -100, predictions.label_ids, tokenizer.pad_token_id)
+    # decode preds and labels
     decoded_pred = tokenizer.batch_decode(prediction, skip_special_tokens=True)
-# decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
-
-# rougeLSum expects newline after each sentence
     print(decoded_pred)
     decoded_preds.append("\n".join(decoded_pred))
-# decoded_labels = ["\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_labels]
 
 # write to file
 with open("./results/decoded_preds_2.txt", "w") as f:
     f.write("\n".join(decoded_preds))
-# with open("./results/decoded_labels_2.txt", "w") as f:
-#    f.write("\n".join(decoded_labels))
