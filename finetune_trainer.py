@@ -17,6 +17,7 @@ val_dataset = load_dataset("json", data_files="val_dataset_processed.json")
 test_dataset = load_dataset("json", data_files="test_dataset_processed.json")
 tokenizer = AutoTokenizer.from_pretrained("t5-large")
 prefix = "Create other options for this question-answer pair: "
+device = "cpu"
 
 def preprocess_function(examples):
     inputs = [prefix + doc for doc in examples["question"]]
@@ -61,6 +62,7 @@ def compute_metrics(eval_preds):
 # Load pretrained model and evaluate model after each epoch
 # model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b")
 model = AutoModelForSeq2SeqLM.from_pretrained("t5-large")
+model = model.to(device)
 data_collator = DataCollatorForSeq2Seq(tokenizer=tokenizer, model=model)
 # freeze everything
 for param in model.parameters():

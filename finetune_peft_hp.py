@@ -118,8 +118,8 @@ for epoch in num_train_epochs:
         )
         eval_dataloader = DataLoader(val_dataset, collate_fn=default_data_collator, batch_size=batch_size, pin_memory=True)
 
-        model = AutoModelForCausalLM.from_pretrained(model_name_or_path, token="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")
-        model = get_peft_model(model, peft_config)
+        hf_model = AutoModelForCausalLM.from_pretrained(model_name_or_path, token="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")
+        model = get_peft_model(hf_model, peft_config)
         print(model.print_trainable_parameters())
 
         optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
